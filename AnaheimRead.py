@@ -68,6 +68,7 @@ def to_graph(pd):
         G.AddFltAttrDatE(edge_temp_id, float(podatki['Congestion']), "Congestion")
 
     return G
+
 def save_to_biary_stream(G,path = "Anheim.graph"):
     """
 
@@ -92,6 +93,9 @@ def load_from_binary_stram(path = "Anheim.graph"):
     FIn = snap.TFIn(path)
     G = snap.TNEANet.Load(FIn)
     return G
+def network():
+    return to_graph(read())
+
 def demo():
     print
     print "Z ukazom read() preberemo podatke Anheim_flow in Anheim_net"
