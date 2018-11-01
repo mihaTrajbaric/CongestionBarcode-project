@@ -109,7 +109,7 @@ def demo():
     # graph
     print "z ukazom G = to_graph(dataframe) dobimo iz dataframa graf (tipa snap.TNEANet)"
     G = to_graph(dataframe)
-
+    print
     print "graf si najlazje izpises z G.Dump()"
     #G.Dump()
     print
@@ -117,9 +117,9 @@ def demo():
     # save_to_biary_stream(G)
     # G1 = load_from_binary_stram()
     # G1.Dump()
-
-    print "trenutno so na povezavah (float) podatki 'Flow','Capacity','Congestion'"
     print
+    print "trenutno so na povezavah (float) atributi 'Flow','Capacity','Congestion'"
+
     print "na povezave dodajamo kot G.AddFltAttrDatE(edge_id, value, name_of_attribute)"
     print "beremo pa kot kot G.GetFltAttrDatE(edge_id, name_of_attribute)"
     print
