@@ -2,6 +2,7 @@ from __future__ import division
 #to have normal division where 1/3 = 0.333333 and not 0
 
 import AnaheimRead as AR
+import ChicagoRead as CR
 import matplotlib.pyplot as plt
 import snap
 import pandas as pd
@@ -156,51 +157,60 @@ def plotProbability(G, sets, la):
 dataframe=AR.read()
 G = AR.to_graph(dataframe)
 
-#G = AR.load_from_binary_stram("Philadelphia.graph")
+##G=CR.read()
+
 
 la=[0.1,0.2,0.3,0.4,0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]
-#la=[0,0.000001,0.000002]
+
+#listof subgraphs for each lambda
 graphs=generateGraphs(G, la)
-
-#plot number of edges in each graph
-edges=[]
-for g in graphs:
-    edges.append(g.GetEdges())
-plt.plot(la, edges)
-plt.xlabel('lambda')
-plt.ylabel('number of edges')
-plt.show()
-
-#plot number of conected components in each graph
-sizeOfCom=[]
-for g in graphs:
-    com= snap.TCnComV()
-    snap.GetWccs(g, com)
-    sizeOfCom.append(len(com))
-plt.plot(la, sizeOfCom)
-plt.xlabel('lambda')
-plt.ylabel('number of components')
-plt.show()
-
-#plot the size of the largest conected components in each graph
-larConComp=[]
-for g in graphs:
-    larConComp.append((snap.GetMxScc(g)).GetNodes())
-plt.plot(la, larConComp)
-plt.xlabel('lambda')
-plt.ylabel('largest conected component')
-plt.show()
-
 
 ##
 #Computing Barcode
 ##
 
+
 sets=getComponents(graphs)
 w= generateBarCode(sets)
-#ploting the barcode
-ww=plotBarcode(w)
 
 
-#ploting the probability of conectednes
-plotProbability(G, sets, la)
+#plot number of edges in each graph
+if __name__ == '__main__':
+    edges=[]
+    for g in graphs:
+        edges.append(g.GetEdges())
+    plt.plot(la, edges)
+    plt.xlabel('lambda')
+    plt.ylabel('number of edges')
+    plt.show()
+
+    #plot number of conected components in each graph
+    sizeOfCom=[]
+    for g in graphs:
+        com= snap.TCnComV()
+        snap.GetWccs(g, com)
+        sizeOfCom.append(len(com))
+    plt.plot(la, sizeOfCom)
+    plt.xlabel('lambda')
+    plt.ylabel('number of components')
+    plt.show()
+
+    #plot the size of the largest conected components in each graph
+    larConComp=[]
+    for g in graphs:
+        larConComp.append((snap.GetMxScc(g)).GetNodes())
+    plt.plot(la, larConComp)
+    plt.xlabel('lambda')
+    plt.ylabel('largest conected component')
+    plt.show()
+
+
+
+    
+    #ploting the barcode
+    ww=plotBarcode(w)
+
+
+    #ploting the probability of conectednes
+    plotProbability(G, sets, la)
+
