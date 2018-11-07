@@ -117,7 +117,35 @@ def plotBarcode(w):
     plt.show()
     return [ww1,ww2]
 
+#probability of conectednes between two nodes from G in components
+def probabilityOfConection(G, components):
+    Rnd = snap.TRnd()
+    Rnd.Randomize()
+    numOfCon=0
+    for i in range(100000):
+        a=G.GetRndNId(Rnd)
+        b=G.GetRndNId(Rnd)
+        while a==b:
+            a=G.GetRndNId(Rnd)
+            b=G.GetRndNId(Rnd)
+        conected=False
+        for s in components:
+            if (a in s) and (b in s):
+                conected=True
+                break
+        if conected:
+            numOfCon+=1
+    return numOfCon/100000
 
+#computing the probability for all lambda and ploting it
+def plotProbability(G, sets, la):
+    prob=[]
+    for s in sets:
+        prob.append(probabilityOfConection(G, s))
+    plt.plot(la, prob)
+    plt.xlabel('lambda')
+    plt.ylabel('probability of conection')
+    plt.show()
 
 #############
 #START!!!!!!#
@@ -172,3 +200,7 @@ sets=getComponents(graphs)
 w= generateBarCode(sets)
 #ploting the barcode
 ww=plotBarcode(w)
+
+
+#ploting the probability of conectednes
+plotProbability(G, sets, la)
