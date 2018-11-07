@@ -75,7 +75,7 @@ def to_graph(pd):
 
     return G
 
-def save_to_biary_stream(G, path = "Anheim.graph"):
+def save_to_biary_stream(G, path = "Anaheim.graph"):
     """
 
     saves graph to binary stream
@@ -88,7 +88,7 @@ def save_to_biary_stream(G, path = "Anheim.graph"):
     G.Save(FOut)
     FOut.Flush()
 
-def load_from_binary_stram(path = "Anheim.graph"):
+def load_from_binary_stram(path = "Anaheim.graph"):
     """
 
     loads graph from binary stram file
@@ -143,3 +143,4 @@ def demo():
 
 if __name__ == '__main__':
     demo()
+    # save_to_biary_stream(network())
