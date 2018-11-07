@@ -25,8 +25,12 @@ def read():
         
         
         temp_edge = graph.AddEdge(fro,to)
+
+        temp_edge_reverse = graph.AddEdge(to,fro)
+
         graph.AddFltAttrDatE(temp_edge,capac,"Capacity")
-    
+        graph.AddFltAttrDatE(temp_edge_reverse,capac,"Capacity")
+
     # adding congestion
     flow = pd.read_csv("TransportationNetworks/Chicago-Sketch/ChicagoSketch_flow.tntp",sep="\t")
     
@@ -35,9 +39,18 @@ def read():
     for _,fro,to,flow_vol in flow_povez.itertuples():
         edge = graph.GetEI(fro,to)
         edge_id = edge.GetId()
+
         capac = graph.GetFltAttrDatE(edge_id, "Capacity")
         graph.AddFltAttrDatE(edge_id,flow_vol,"Flow")
         graph.AddFltAttrDatE(edge_id,flow_vol*1.0/capac,"Congestion")
+
+        # reverse edge
+
+        edge_rev = graph.GetEI(to, fro)
+        edge_rev_id = edge_rev.GetId()
+        capac_rev = graph.GetFltAttrDatE(edge_rev_id, "Capacity")
+        graph.AddFltAttrDatE(edge_rev_id, flow_vol, "Flow")
+        graph.AddFltAttrDatE(edge_rev_id, flow_vol * 1.0 / capac_rev, "Congestion")
     
     return graph
 
