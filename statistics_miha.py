@@ -57,7 +57,7 @@ def read(name, la):
 def lamda_degree_distribution(graphs, la, name="", save_fig=False):
     for i in range(len(graphs)):
         plot_degree_distribution(graphs[i], "{} (lambda {})".format(name, la[i]), save_fig=save_fig)
-def k_clust_coef(G,node_id, k=2):
+def k_clust_coef(G,node_id, k=5):
     """
     computes k clustering coef of node
     """
@@ -87,10 +87,11 @@ def k_clust_coef(G,node_id, k=2):
     coef = n_edges / (n_nodes * (n_nodes-1))
     return coef
 
-def get_k_clust_coef(G,k=2):
+def get_k_clust_coef(G,k=5):
     """
     computes cluster coef of all nodes in G
     funkcija za kobala
+
     """
     clustering_coefs = []
     for node in G.Nodes():
