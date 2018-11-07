@@ -62,14 +62,20 @@ def to_graph(pd):
     #adds edges
     for row in pd.iterrows():
         podatki = row[1]
+
         edge_temp_id = G.AddEdge(int(podatki['Tail']), int(podatki['Head']))
         G.AddFltAttrDatE(edge_temp_id, float(podatki['Flow (veh/h)']), "Flow")
         G.AddFltAttrDatE(edge_temp_id, float(podatki['Capacity (veh/h)']), "Capacity")
         G.AddFltAttrDatE(edge_temp_id, float(podatki['Congestion']), "Congestion")
 
+        edge_temp_id_reverse = G.AddEdge(int(podatki['Head']),int(podatki['Tail']))
+        G.AddFltAttrDatE(edge_temp_id_reverse, float(podatki['Flow (veh/h)']), "Flow")
+        G.AddFltAttrDatE(edge_temp_id_reverse, float(podatki['Capacity (veh/h)']), "Capacity")
+        G.AddFltAttrDatE(edge_temp_id_reverse, float(podatki['Congestion']), "Congestion")
+
     return G
 
-def save_to_biary_stream(G,path = "Anheim.graph"):
+def save_to_biary_stream(G, path = "Anheim.graph"):
     """
 
     saves graph to binary stream
@@ -115,7 +121,7 @@ def demo():
     G = to_graph(dataframe)
     print
     print "graf si najlazje izpises z G.Dump()"
-    #G.Dump()
+    # G.Dump()
     print
     print "ukaza save_to_biary_stream(G) in G1 = load_from_binary_stram() sta za shranjevanje in branje iz .graph datotek"
     # save_to_biary_stream(G)
@@ -127,11 +133,11 @@ def demo():
     print "na povezave dodajamo kot G.AddFltAttrDatE(edge_id, value, name_of_attribute)"
     print "beremo pa kot kot G.GetFltAttrDatE(edge_id, name_of_attribute)"
     print
-    print "primer na povezavi edge_id = 1"
+    print "primer na povezavi edge_id = 2"
 
-    print "Flow",G.GetFltAttrDatE(1, "Flow")
-    print "Capacity",G.GetFltAttrDatE(1, "Capacity")
-    print "Congestion",G.GetFltAttrDatE(1, "Congestion")
+    print "Flow",G.GetFltAttrDatE(2, "Flow")
+    print "Capacity",G.GetFltAttrDatE(2, "Capacity")
+    print "Congestion",G.GetFltAttrDatE(2, "Congestion")
     print
     print "srecno!"
 
