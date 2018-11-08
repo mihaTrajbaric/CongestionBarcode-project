@@ -52,5 +52,5 @@ def visualize_nodes(graph_name,function):
     plt.show()
 
 if __name__ == '__main__':
-    #visualize("ChicagoSketch")
-    visualize_nodes("ChicagoSketch",plpi)
+    visualize("Anaheim")
+    #visualize_nodes("ChicagoSketch",plpi)

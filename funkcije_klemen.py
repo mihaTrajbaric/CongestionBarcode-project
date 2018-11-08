@@ -59,6 +59,8 @@ def degree_list_po_id(graph_name):
 
      return out
 
+
+
 if __name__ == '__main__':
     pagerank_list_po_id_nx("Anaheim")
     #degree_list_po_id("Anaheim")
