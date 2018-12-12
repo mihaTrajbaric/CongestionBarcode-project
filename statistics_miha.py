@@ -62,7 +62,7 @@ def k_clust_coef(G,node_id, k=5):
     computes k clustering coef of node
     """
 
-    nbr_set = set([node_id])
+    nbr_set = {node_id}
     for _ in range(k):
         nbr_set_new = set()
         for node_temp_id in nbr_set:
@@ -79,12 +79,15 @@ def k_clust_coef(G,node_id, k=5):
     nbr_subgraph.DelNode(node_id)
     n_edges = nbr_subgraph.GetEdges()
 
-
     n_nodes = nbr_subgraph.GetNodes()
     if n_nodes == 0:
         return 0
+    try:
+        coef = n_edges / (n_nodes * (n_nodes-1))
 
-    coef = n_edges / (n_nodes * (n_nodes-1))
+    except ZeroDivisionError:
+        # in case of 1 or 0 n_nodes
+        coef = 0
     return coef
 
 def get_k_clust_coef(G,k=5):
@@ -107,7 +110,8 @@ if __name__ == '__main__':
     lamda_degree_distribution(graphs_ana, la, "Anaheim", save_fig=False)
     lamda_degree_distribution(graphs_chi, la, "Chicago", save_fig=False)
 
-    k_clust_a = get_k_clust_coef(AR.network(), k=5)
+    network = AR.network()
+    k_clust_a = get_k_clust_coef(network, k=5)
     plt.hist(k_clust_a)
     plt.show()
 
