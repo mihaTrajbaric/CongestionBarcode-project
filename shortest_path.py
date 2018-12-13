@@ -8,11 +8,11 @@ def find_shortest_path(graph, start_node_id, end_nodes_ids, weight_type="Congest
     """
     if not graph.IsNode(start_node_id):
         # print "start node is not in graph, node id:", start_node_id
-        return
+        return float("inf"), []
     for end_node_id in end_nodes_ids:
         if not graph.IsNode(end_node_id):
-            # print "end node is not in graph, node id:", end_node_id
-            return
+            #print "end node is not in graph, node id:", end_node_id
+            return float("inf"), []
 
     # nodes we already visited, spread out from
     visited = set()
@@ -33,43 +33,46 @@ def find_shortest_path(graph, start_node_id, end_nodes_ids, weight_type="Congest
 
 
 def _iterate_shortest_path(graph, visited, to_visit, end_nodes, weight_type, prev_nodes):
-    if len(to_visit) == 0:
-        # infinite length, path not found
-        return float("inf")
+    while True:
+        if len(to_visit) == 0:
+            # infinite length, path not found
+            return float("inf")
 
-    path_length, current_node, prev_node = to_visit[0]
+        path_length, current_node, prev_node = to_visit[0]
 
-    if current_node in visited:
-        to_visit = to_visit[1:]
-        return _iterate_shortest_path(graph, visited, to_visit, end_nodes, weight_type)
-
-    visited.add(current_node)
-    prev_nodes[current_node] = prev_node
-
-    # found path
-    if current_node in end_nodes:
-        return path_length
-
-    to_visit = to_visit[1:]
-
-    node = graph.GetNI(current_node)
-    degree = node.GetOutDeg()
-
-    for i in xrange(degree):
-        neib_id = node.GetOutNId(i)
-
-        if neib_id in visited:
+        if current_node in visited:
+            to_visit = to_visit[1:]
             continue
+            # return _iterate_shortest_path(graph, visited, to_visit, end_nodes, weight_type, prev_nodes)
 
-        edge = graph.GetEI(current_node, neib_id)
-        weight = graph.GetFltAttrDatE(edge, weight_type)
+        visited.add(current_node)
+        prev_nodes[current_node] = prev_node
 
-        to_visit.append((path_length + weight, neib_id,current_node))
+        # found path
+        if current_node in end_nodes:
+            return path_length
 
-    # sort by weights
-    to_visit = sorted(to_visit)
+        to_visit = to_visit[1:]
 
-    return _iterate_shortest_path(graph, visited, to_visit, end_nodes, weight_type,prev_nodes)
+        node = graph.GetNI(current_node)
+        degree = node.GetOutDeg()
+
+        for i in xrange(degree):
+            neib_id = node.GetOutNId(i)
+
+            if neib_id in visited:
+                continue
+
+            edge = graph.GetEI(current_node, neib_id)
+            weight = graph.GetFltAttrDatE(edge, weight_type)
+            if abs(weight) < 1e-8 or abs(weight) > 1e+8:
+                weight = 0.0
+            to_visit.append((path_length + weight, neib_id,current_node))
+
+        # sort by weights
+        to_visit = sorted(to_visit)
+
+        # return _iterate_shortest_path(graph, visited, to_visit, end_nodes, weight_type,prev_nodes)
 
 
 def test():

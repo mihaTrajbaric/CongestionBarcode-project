@@ -6,6 +6,7 @@ import ChicagoRead as CR
 from barcode import generateGraphs, getComponents
 from shortest_path import find_shortest_path
 import numpy as np
+import time
 
 
 def read(name, la, lambda_subgraphs=True):
@@ -78,31 +79,118 @@ def make_detour(Graph, lambda_list, lambda_subgraphs, src_node_ID, dst_node_ID):
             continue
         if path_length != float("inf"):
             return_edge()
-            return lambda_, path
+            return lambda_, path_length
         # else:
         #    print lambda_,path_length
     return_edge()
-    return -1, []
+    return -1, 0
+
+def detour_without_lambda(Graph, src_node_ID, dst_node_ID):
+    """
+    makes a detour just with path_finding algorithm, without lambda optimization
+    :param Graph: snap.TNEANet graph
+    :param src_node_ID: source node
+    :param dst_node_ID: source node
+    :return: path length
+    """
+    try:
+        edge = Graph.GetEI(src_node_ID, dst_node_ID)
+
+    except:
+        print("edge {}->{} does not exist".format(src_node_ID, dst_node_ID))
+        return
+    edge_id = edge.GetId()
+    flow = Graph.GetFltAttrDatE(edge_id, "Flow")
+    capacity = Graph.GetFltAttrDatE(edge_id, "Capacity")
+    congestion = Graph.GetFltAttrDatE(edge_id, "Congestion")
+
+    # delete the edge
+    Graph.DelEdge(src_node_ID, dst_node_ID)
+    # delete the edge from all subsets
+
+    def return_edge():
+
+        # and to main graph
+        id = Graph.AddEdge(src_node_ID, dst_node_ID)
+        Graph.AddFltAttrDatE(id, flow, "Flow")
+        Graph.AddFltAttrDatE(id, capacity, "Capacity")
+        Graph.AddFltAttrDatE(id, congestion, "Congestion")
+
+    path_length, path = find_shortest_path(Graph, src_node_ID, [dst_node_ID], weight_type="Congestion")
+    if path_length != float("inf"):
+        return_edge()
+        return path_length
+
+    return_edge()
+    return 0
+
+def subgraph_statistics(graph_name="Anaheim"):
+    congestion = max_congestion(graph_name)
+    lambda_list = np.arange(0.1, round(congestion, 1) + 0.2, 0.1).tolist()
+    G, graphs, _ = read(graph_name, lambda_list)
+    assert len(graphs) == len(lambda_list)
+    snap.PrintInfo(G, graph_name, "info-{}.txt".format(graph_name), False)
+    EdgeV = snap.TIntPrV()
+    snap.GetEdgeBridges(G, EdgeV)
+    print len(EdgeV)
+    for i in range(len(graphs)):
+        snap.PrintInfo(graphs[i], "{} subgraph {}".format(graph_name, i), "info-{}{}.txt".format(graph_name, i), False)
+
 
 
 def test_detouring(lambda_list, graph_name="Anaheim", n_of_tests=100):
     G, graphs, _ = read(graph_name, lambda_list)
+    assert len(graphs) == len(lambda_list)
+    # print lambda_list
     distrib = []
+    no_path = 0
+    path_length_without_lambda = 0
+    path_length_with_lambda = 0.0
+    total_time_without_lambda = 0
+    total_time_with_lambda = 0.0
+    path_list = []
+
     for i in range(n_of_tests):
         # pick random edge
         edge_id = G.GetRndEId()
         edge = G.GetEI(edge_id)
         src_id = edge.GetSrcNId()
         dst_id = edge.GetDstNId()
-        lambda_, path_length = make_detour(G, lambda_list, graphs, src_id, dst_id)
-        distrib.append(lambda_)
-    plt.hist(distrib, bins='auto')
-    plt.title("lambda detour for {}".format(graph_name))
-    plt.xlabel("lambda")
-    plt.ylabel("n of random events")
-    plt.savefig("results_{}.png".format(graph_name))
-    plt.show()
 
+        # src_id = 896
+        # dst_id = 899
+
+        start = time.time()
+        lambda_, path_length = make_detour(G, lambda_list, graphs, src_id, dst_id)
+        temp_time_lambda = time.time() - start
+
+        start = time.time()
+        path_length_no_lambda_temp = detour_without_lambda(G, src_id, dst_id)
+        temp_time_no_lambda = time.time() - start
+
+        if path_length_no_lambda_temp != float("inf"):
+            path_length_without_lambda += path_length_no_lambda_temp
+        total_time_without_lambda += temp_time_no_lambda
+
+        if lambda_ == -1 | (float(path_length) == float("inf")) | (float(path_length) == -float("inf")):
+            no_path += 1
+            total_time_with_lambda += temp_time_lambda
+        else:
+            path_list.append(path_length)
+            total_time_with_lambda += temp_time_lambda
+            path_length_with_lambda += path_length
+            distrib.append(lambda_)
+    # path_length_with_lambda /= (n_of_tests - no_path)
+    # print distrib
+    print "path list",path_list
+    plt.hist(distrib, bins=len(lambda_list))
+    plt.title("Lambda detour for {} network".format(graph_name))
+    plt.xlabel("lambda")
+    plt.ylabel("# of detours")
+    plt.savefig("results_{}.svg".format(graph_name))
+    plt.show()
+    print "Graph {}, no detour {}, total time: {}, average path length {}".format(graph_name, no_path,total_time_with_lambda,path_length_with_lambda)
+    print "time without lambda: {}, path length without lambda {}, ration path: {}, ratio time {}".format(total_time_without_lambda,path_length_without_lambda,path_length_with_lambda/path_length_without_lambda,total_time_with_lambda/total_time_without_lambda)
 
 def test():
     G = snap.TNEANet().New()
@@ -141,7 +229,7 @@ def test():
 def run(network_name="Anaheim"):
     congestion = max_congestion(network_name)
 
-    la = np.arange(0.1, round(congestion, 1) + 0.2, 0.1).tolist()
+    la = [round(x, 1) for x in np.arange(0.1, round(congestion, 1) + 0.2, 0.1).tolist()]
     test_detouring(la, n_of_tests=1000, graph_name=network_name)
 
 
@@ -151,7 +239,16 @@ def max_congestion(network="Anaheim"):
     max_congest = max([G.GetFltAttrDatE(edge, "Congestion") for edge in G.Edges()])
     return max_congest
 
+def test2():
+    congestion = max_congestion("Anaheim")
+
+    la = [round(x,1) for x in np.arange(0.1, round(congestion, 1) + 0.2, 0.1).tolist()]
+    print la
 
 if __name__ == '__main__':
+
+    # subgraph_statistics("Chicago")
+    # subgraph_statistics("Anaheim")
     run(network_name="Chicago")
     run(network_name="Anaheim")
+    # test2()
